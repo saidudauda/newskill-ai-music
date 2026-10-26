@@ -14,10 +14,17 @@ export default function Home() {
   const [tab, setTab] = useState("Create");
   const [notice, setNotice] = useState("");
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!prompt.trim()) { setNotice("Describe the sound you want first."); return; }
-    setNotice("Studio interface is ready. Connect a music-generation API to generate real audio; no song has been generated yet.");
+    setNotice("Checking official Suno API configuration…");
+    try {
+      const response = await fetch("/api/music/status", { cache: "no-store" });
+      const status = await response.json();
+      setNotice(status.message || "Suno generation is not enabled yet.");
+    } catch {
+      setNotice("Could not check Suno configuration. No song was generated.");
+    }
   }
 
   return <main className="shell">
@@ -42,7 +49,7 @@ export default function Home() {
           <div className="field-meta"><span>Be specific about genre, instruments, vocals and mood.</span><span>{prompt.length}/1200</span></div>
           {mode === "song" && <><label htmlFor="lyrics" className="lyrics-label">LYRICS <span className="optional">OPTIONAL</span></label><textarea id="lyrics" className="lyrics" value={lyrics} onChange={e => setLyrics(e.target.value)} placeholder="Paste your lyrics here, or leave blank if your chosen provider supports lyric generation..." maxLength={5000}/></>}
           <div className="options-grid"><div><label htmlFor="genre">GENRE</label><select id="genre" value={genre} onChange={e => setGenre(e.target.value)}>{genres.map(g => <option key={g}>{g}</option>)}</select></div><div><label htmlFor="mood">MOOD</label><select id="mood" value={mood} onChange={e => setMood(e.target.value)}>{moods.map(m => <option key={m}>{m}</option>)}</select></div></div>
-          <div className="form-footer"><span className="provider-note"><span>✧</span> AI music engine not connected</span><button className="generate" type="submit">Create track <span>✦</span></button></div>
+          <div className="form-footer"><span className="provider-note"><span>✧</span> Official Suno API access required</span><button className="generate" type="submit">Check Suno connection <span>✦</span></button></div>
           {notice && <div className="notice" role="status">{notice}</div>}
         </form>
         <div className="bottom-note"><span>✧</span><span><b>Made for creators.</b> Build a sound that belongs to you.</span><span className="bottom-right">NEWSKILL PRO © 2026</span></div>
