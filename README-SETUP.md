@@ -1,50 +1,59 @@
 # NEWSKILL PRO AI MUSIC
 
-A Next.js starter for a branded AI music creation platform.
+A Next.js music-generation app starter. The first generation engine is **Stability AI Stable Audio 3.0**, selected because it has a documented, self-serve API. It is primarily an instrumental music engine, not a drop-in replacement for Suno's vocal-song generation.
 
-## Current status
+## Implemented
 
-- Branded responsive music studio interface with song/instrumental modes, prompt, optional lyrics, genre and mood controls.
-- GitHub Actions build workflow configured.
-- Environment-variable template for Suno API access, database/auth and Paystack.
-- **Not yet a production music generator:** official Suno API credentials and provider-specific API documentation have not been configured; authentication, database, payments, credit accounting and deployment are not connected.
+- Responsive NEWSKILL PRO studio UI with genre, mood, prompt and duration controls.
+- Server-side API route for Stable Audio 3.0 text-to-audio generation.
+- Audio response playback and MP3 download in the browser.
+- Server-side API key handling and a feature flag that disables generation by default.
+- GitHub Actions build workflow.
 
-## Official Suno integration
+## Engine capabilities and cost
 
-Suno now has an official API portal: https://platform.suno.com/ . Sign in with the account linked to your Suno account and check whether API access, API credentials and technical documentation are available for your account. Access may require approval or an enabled API account.
+Stable Audio 3.0 supports text-to-audio and audio-to-audio, and can generate up to six minutes of audio. Stability AI's published API pricing currently lists Stable Audio 3.0 at 26 credits per generation; 1 credit is $0.01, so treat this as approximately $0.26 per request before any taxes or pricing changes. Check the live pricing before setting customer subscription limits. The API account advertises 25 free credits for new accounts; that is not enough for one 26-credit generation unless the account's credit balance is topped up.
 
-Do not use an unofficial wrapper or reverse-engineered endpoint as if it were Suno's official API. The integration must follow the base URL, authentication scheme, request/response formats, usage limits and commercial terms provided in your official account documentation.
+Official links:
+- API platform: https://platform.stability.ai/
+- API docs / text-to-audio: https://platform.stability.ai/
+- Pricing: https://platform.stability.ai/pricing
+- Commercial and usage licensing: https://kb.stability.ai/knowledge-base/stable-audio-commerical-and-usage-licensing
 
-When Suno has enabled access, add the supplied values to your deployment environment as `SUNO_API_BASE_URL`, `SUNO_API_KEY`, and `SUNO_API_MODEL`. Set `SUNO_API_ACCESS_CONFIRMED=true` only after confirming the access and terms in the official account. Never commit actual credentials.
+Stable Audio is designed primarily for instrumental work and is not intended to generate intelligible vocals. Do not advertise vocal-song generation until a suitable licensed provider is integrated. Check current terms, pricing and account permissions before selling access.
 
-## Run locally
+## Configure locally
 
-1. Install Node.js 20 or newer.
-2. Run `npm install`.
-3. Copy `.env.example` to `.env.local` and fill in credentials only after selecting/receiving the relevant providers.
-4. Run `npm run dev` and open http://localhost:3000.
+1. Create a Stability AI account and API key at https://platform.stability.ai/.
+2. Copy `.env.example` to `.env.local`.
+3. Set `STABILITY_API_KEY` to your secret key.
+4. Run `npm install` and `npm run dev`.
+5. Test the generation API privately first. Only then set `MUSIC_GENERATION_ENABLED=true`.
+
+**Important:** Generation is disabled by default. The current starter does not yet include user login, per-user quotas, rate limiting, persistent track storage or payment verification. Do not enable public generation on a public deployment until those protections are implemented, otherwise an unauthenticated visitor could spend your API credits.
 
 ## Vercel deployment
 
-1. Sign in to https://vercel.com/ using GitHub.
-2. Import **saidudauda/newskill-ai-music** as a new Vercel project. Do not import or modify the existing `newskill.com` repository.
-3. Keep the framework preset as Next.js and the root directory as `./`.
-4. Add API credentials as Vercel Environment Variables only after official Suno access is enabled; never put secret keys in `NEXT_PUBLIC_*` variables.
-5. Deploy and check the build log and resulting URL. A deployment is only successful once Vercel reports it as Ready.
+1. Sign in to https://vercel.com/ with GitHub.
+2. Import **saidudauda/newskill-ai-music** as a new project; do not alter the existing `newskill.com` repository.
+3. Keep Next.js as the framework and `./` as root directory.
+4. Add `STABILITY_API_KEY` as a server-side Vercel Environment Variable. Do not use a `NEXT_PUBLIC_` prefix for secrets.
+5. Keep `MUSIC_GENERATION_ENABLED=false` until authentication, limits and payment protections are ready.
+6. Deploy and confirm Vercel reports the deployment as Ready.
 
-No Vercel project has been linked and no deployment URL has been verified yet.
+No Vercel deployment has been created or verified yet.
 
-## Next implementation milestones
+## Not yet implemented
 
-1. Implement the exact official Suno API request, task polling/callbacks and audio delivery after the account docs are available.
-2. Add authentication and a database for users, jobs, tracks and a transactional credit ledger.
-3. Add Paystack checkout and verified webhooks before granting subscription credits. Never trust client-side payment success.
-4. Add user library, download controls, moderation, rate limits, usage tracking and an admin dashboard.
-5. Test generation costs, retry behavior, licensing and commercial-use terms before selling subscriptions.
+- Authentication and database-backed users / track library.
+- User quotas, credits, abuse protection and job history.
+- Paystack checkout, verified webhooks and subscription management.
+- Admin dashboard, monitoring and production error handling.
+- Vocal generation or exact Suno feature parity.
 
-## Security notes
+## Security
 
-- Never expose provider or payment secret keys in client code.
-- Never commit real credentials to Git.
-- Verify payment webhooks server-side and make credit grants idempotent.
-- Clearly disclose provider usage, licensing and commercial-use terms to users.
+- Never commit real credentials.
+- Never expose API secrets in client-side code.
+- Add authentication, per-user limits and server-side billing checks before allowing public generation.
+- Do not grant subscription credits based only on client-side payment status.
