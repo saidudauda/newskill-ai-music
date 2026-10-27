@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": upstream.headers.get("content-type") || "audio/mpeg",
-        "Content-Disposition": 'attachment; filename="newskill-pro-track.mp3"',
+        "Content-Disposition": 'attachment; filename="newskill-soniq-track.mp3"',
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
       },
