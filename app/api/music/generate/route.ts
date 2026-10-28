@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     const choice = task.choices?.[0] || {};
-    const audioUrl = [choice.url, choice.audio_url, choice.music_url, choice.download_url]
+    const audioUrl = [choice.url, choice.audio_url, choice.music_url, choice.download_url, choice.wav_url, choice.mp3_url]
       .find(value => typeof value === "string" && /^https:\/\//i.test(value as string)) as string | undefined;
 
     if (!audioUrl) {
