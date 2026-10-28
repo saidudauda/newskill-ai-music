@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     const choice = task.choices?.[0] || {};
-    const audioUrl = [choice.url, choice.audio_url, choice.music_url, choice.download_url, choice.wav_url, choice.mp3_url]
+    const audioUrl = [choice.wav_url, choice.url, choice.audio_url, choice.music_url, choice.download_url, choice.mp3_url, choice.stream_url]
       .find(value => typeof value === "string" && /^https:\/\//i.test(value as string)) as string | undefined;
 
     if (!audioUrl) {
@@ -124,11 +124,14 @@ export async function POST(request: NextRequest) {
     const audio = await audioResponse.arrayBuffer();
     if (!audio.byteLength) return NextResponse.json({ error: "Mureka returned an empty audio file." }, { status: 502 });
 
+    const contentType = audioResponse.headers.get("content-type") || (audioUrl.toLowerCase().includes(".wav") ? "audio/wav" : "audio/mpeg");
+    const extension = contentType.includes("wav") || audioUrl.toLowerCase().includes(".wav") ? "wav" : contentType.includes("mp4") || contentType.includes("m4a") ? "m4a" : "mp3";
+
     return new Response(audio, {
       status: 200,
       headers: {
-        "Content-Type": audioResponse.headers.get("content-type") || "audio/mpeg",
-        "Content-Disposition": 'attachment; filename="newskill-soniq-track.mp3"',
+        "Content-Type": contentType,
+        "Content-Disposition": `attachment; filename="newskill-soniq-track.${extension}"`,
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
       },
