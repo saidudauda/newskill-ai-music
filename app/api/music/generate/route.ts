@@ -54,7 +54,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Your description must be between 5 and 1,000 characters." }, { status: 400 });
   }
 
-  const fullPrompt = `${genre} instrumental. Mood: ${mood.toLowerCase()}. ${prompt}. Instrumental only, no intelligible vocals. Aim for about ${duration} seconds where supported.`;
+  // Mureka documents a 1,024-character prompt limit. Keep the assembled prompt within it.
+  const promptPrefix = `${genre} instrumental. Mood: ${mood.toLowerCase()}. `;
+  const promptSuffix = `. Instrumental only, no intelligible vocals. Aim for about ${duration} seconds where supported.`;
+  const fullPrompt = `${promptPrefix}${prompt.slice(0, Math.max(5, 1024 - promptPrefix.length - promptSuffix.length))}${promptSuffix}`.slice(0, 1024);
 
   try {
     const start = await fetch("https://api.mureka.ai/v1/instrumental/generate", {
